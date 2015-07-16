@@ -1,0 +1,118 @@
+<html ng-app="App">
+<style type="text/css">
+body {
+	background-image: url(img/bg.png);
+	no-repeat center center fixed; 
+	-webkit-background-size: cover;
+	-moz-background-size: cover;
+	-o-background-size: cover;
+	background-size: cover;
+}
+
+.main {
+	position: absolute;
+	left: 0px;
+    top: 0px;
+	z-index: 0;
+	width: 100%;
+}
+
+qr-scanner {
+	position: absolute;
+	left: 700px;
+	z-index: 10;
+    top: 620px;
+}
+
+.welcome {
+	position: absolute;
+	left: 0px;
+    top: 0px;
+	z-index: 10;
+	width: 100%;
+}
+
+.welcomeImage {
+	position: absolute;
+	left: 0px;
+    top: 0px;
+	z-index: 30;
+	width: 100%;
+}
+
+.fullname {
+	position: absolute;
+	text-align: center;
+	
+	top: 581px;
+	width: 100%;
+	font-size: 50pt;
+	z-index: 50;
+	left: 0px;
+}
+</style>
+<body >
+
+<div class="main" ng-controller="qrCrtl">
+<div class="welcome" ng-show="showWelcome">
+<img class="welcomeImage" src="img/frame.png"/>
+<div class="fullname">{{ fullname }}</div>
+</div>
+<qr-scanner width="600" height="450" ng-success="onSuccess(data)" ng-error="onError(error)" ng-hide="showWelcome"/>
+
+<script src="lib/angular/angular.js"></script>
+<script src="lib/angular-qr-scanner/qr-scanner.js"></script>
+<script src="lib/angular-qr-scanner/src/jsqrcode-combined.min.js"></script>
+<script>
+
+var App = angular.module('App', ['qrScanner']);
+var lastFullname = "";
+
+App.controller('qrCrtl', ['$scope', '$http', '$timeout', 
+	function($scope, $http, $timeout) {
+		
+		$scope.showWelcome=false;
+		
+	    $scope.onSuccess = function(data) {
+			console.log(data);
+	        if (! $scope.showWelcome)
+			{
+				$scope.showWelcome=true;
+				$scope.fullname=data;
+				lastFullname=data;
+				
+				$timeout(function() {
+					$scope.showWelcome=false;
+					$scope.fullname="";
+				}, 7000);
+				
+				$scope.register();
+			}
+	    };
+	    $scope.onError = function(error) {
+	        //console.log(error);
+			
+	    };
+	    $scope.onVideoError = function(error) {
+	        //console.log(error);
+			
+	    };
+		
+		// Create new Article
+		$scope.register = function() {
+			console.log("do register");
+			$http.post('register/', {fullname: $scope.fullname}).
+				success(function(data, status, headers, config) {
+					console.log("registered:" + data);
+				}).
+				error(function(data, status, headers, config) {
+					console.log("fail");
+				});
+		};
+	
+}]);
+
+</script>
+</div>
+</body>
+</html>
